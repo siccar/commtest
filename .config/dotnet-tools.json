@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "siccarcmd": {
+      "version": "1.1.6",
+      "commands": [
+        "siccarcmd"
+      ]
+    }
+  }
+}

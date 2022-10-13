@@ -1,0 +1,179 @@
+{
+  "id": "48795f7b-25bd-420f-b938-e37ac126cb33",
+  "title": "PingPong",
+  "description": "A simple blueprint to bounce transactions backwards and forwards",
+  "version": 1,
+  "dataSchemas": [
+    {
+      "$schema": "http://json-schema.org/draft-07/schema",
+      "$id": "https://siccar.net/schema/endorse.json",
+      "type": "object",
+      "title": "Siccar Endorsement",
+      "description": "A boolean choice 'true' or 'false' ",
+      "default": {
+        "endorse": false
+      },
+      "examples": [
+        {
+          "endorse": true
+        }
+      ],
+      "required": [
+        "endorse"
+      ],
+      "properties": {
+        "endorse": {
+          "$id": "#/properties/endorse",
+          "type": "boolean",
+          "title": "Endorsement",
+          "description": "Do you endorse the presented data?"
+        }
+      },
+      "additionalProperties": true
+    }
+  ],
+  "participants": [
+    {
+      "id": "25FD5262-932C-4B58-8E17-378B03AA818A",
+      "name": "Ping Participant",
+      "organisation": "Org1",
+      "walletAddress": "{{walletAddress1}}",
+      "useStealthAddress": false
+    },
+    {
+      "id": "91CC629C-DC4F-42CD-A54F-4BB201B14ECA",
+      "name": "Pong Participant",
+      "organisation": "Org1",
+      "walletAddress": "{{walletAddress2}}",
+      "useStealthAddress": false
+    }
+  ],
+  "actions": [
+    {
+      "id": 1,
+      "previousTxId": "000000000000000000000000000000000",
+      "blueprint": "48795f7b-25bd-420f-b938-e37ac126cb33",
+      "title": "Ping Action",
+      "description": "P1 sends to P2",
+      "sender": "25FD5262-932C-4B58-8E17-378B03AA818A",
+      "dataSchemas": [
+        {
+          "$schema": "http://json-schema.org/draft-07/schema",
+          "$id": "https://siccar.net/schema/endorse.json",
+          "type": "object",
+          "title": "Siccar Endorsement",
+          "description": "A boolean choice 'true' or 'false' ",
+          "default": {
+            "endorse": false
+          },
+          "examples": [
+            {
+              "endorse": true
+            }
+          ],
+          "required": [
+            "endorse"
+          ],
+          "properties": {
+            "endorse": {
+              "$id": "#/properties/endorse",
+              "type": "boolean",
+              "title": "Endorsement",
+              "description": "Do you endorse the presented data?"
+            }
+          },
+          "additionalProperties": true
+        }
+      ],
+      "participants": [
+        {
+          "Supplier": [ { "==": [ 0, 0 ] } ]
+        }
+      ],
+      "disclosures": [
+        {
+          "participantAddress": "TrackingData",
+          "dataPointers": [
+            "endorse"
+          ]
+        },
+        {
+          "participantAddress": "{{walletAddress2}}",
+          "dataPointers": [
+            "endorse"
+          ]
+        }
+      ],
+      "condition": { "or": [ false, 2 ] },
+      "form": {
+        "type": "Layout",
+        "title": "",
+        "scope": "$",
+        "layout": "VerticalLayout",
+        "elements": [],
+        "conditions": []
+      }
+    },
+    {
+      "id": 2,
+      "previousTxId": "000000000000000000000000000000000",
+      "blueprint": "48795f7b-25bd-420f-b938-e37ac126cb33",
+      "title": "Pong Action",
+      "description": "P2 sends to P1",
+      "sender": "91CC629C-DC4F-42CD-A54F-4BB201B14ECA",
+      "participants": [],
+      "dataSchemas": [
+        {
+          "$schema": "http://json-schema.org/draft-07/schema",
+          "$id": "https://siccar.net/schema/endorse.json",
+          "type": "object",
+          "title": "Siccar Endorsement",
+          "description": "A boolean choice 'true' or 'false' ",
+          "default": {
+            "endorse": false
+          },
+          "examples": [
+            {
+              "endorse": true
+            }
+          ],
+          "required": [
+            "endorse"
+          ],
+          "properties": {
+            "endorse": {
+              "$id": "#/properties/endorse",
+              "type": "boolean",
+              "title": "Endorsement",
+              "description": "Do you endorse the presented data?"
+            }
+          },
+          "additionalProperties": true
+        }
+      ],
+      "disclosures": [
+        {
+          "participantAddress": "TrackingData",
+          "dataPointers": [
+            "endorse"
+          ]
+        },
+        {
+          "participantAddress": "{{walletAddress1}}",
+          "dataPointers": [
+            "endorse"
+          ]
+        }
+      ],
+      "condition": { "or": [ false, 1 ] },
+      "form": {
+        "type": "Layout",
+        "title": "",
+        "scope": "$",
+        "layout": "VerticalLayout",
+        "elements": [],
+        "conditions": []
+      }
+    }
+  ]
+}
