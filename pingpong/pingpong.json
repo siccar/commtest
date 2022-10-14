@@ -27,6 +27,12 @@
           "type": "boolean",
           "title": "Endorsement",
           "description": "Do you endorse the presented data?"
+        },
+        "textdata": {
+          "$id": "#/properties/textdata",
+          "type": "string",
+          "title": "textdata",
+          "description": "Some text data."
         }
       },
       "additionalProperties": true
@@ -80,6 +86,12 @@
               "type": "boolean",
               "title": "Endorsement",
               "description": "Do you endorse the presented data?"
+            },
+            "textdata": {
+              "$id": "#/properties/textdata",
+              "type": "string",
+              "title": "textdata",
+              "description": "Some text data."
             }
           },
           "additionalProperties": true
@@ -94,13 +106,15 @@
         {
           "participantAddress": "TrackingData",
           "dataPointers": [
-            "endorse"
+            "endorse",
+            "textdata"
           ]
         },
         {
           "participantAddress": "{{walletAddress2}}",
           "dataPointers": [
-            "endorse"
+            "endorse",
+            "textdata"
           ]
         }
       ],
@@ -146,6 +160,12 @@
               "type": "boolean",
               "title": "Endorsement",
               "description": "Do you endorse the presented data?"
+            },
+            "textdata": {
+              "$id": "#/properties/textdata",
+              "type": "string",
+              "title": "textdata",
+              "description": "Some text data."
             }
           },
           "additionalProperties": true
@@ -155,13 +175,15 @@
         {
           "participantAddress": "TrackingData",
           "dataPointers": [
-            "endorse"
+            "endorse",
+            "textdata"
           ]
         },
         {
           "participantAddress": "{{walletAddress1}}",
           "dataPointers": [
-            "endorse"
+            "endorse",
+            "textdata"
           ]
         }
       ],

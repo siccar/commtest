@@ -1,11 +1,13 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Siccar.Common.ServiceClients;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using Siccar.Application;
 using Siccar.Platform;
 using System.Text.Json;
+using System.Diagnostics.Metrics;
 
-namespace CommTest.basic
+namespace CommTest.pingpong
 {
     public class PingPongTest : IDisposable
     {
@@ -26,6 +28,7 @@ namespace CommTest.basic
         private Random random = new Random();
         private int rndFactor = 2; // choice of 2 will give balance, higer values wille skew bias
 
+        private int executedRounds = 1;
         private bool isSetup = false;
 
         public PingPongTest(IServiceProvider serviceProvider, string bearer)
@@ -46,19 +49,33 @@ namespace CommTest.basic
         }
 
         // check we have everything we need
-        public async Task<string> SetupTest()
+        public async Task<string> SetupTest(string useregister)
         {
-            // Create a register
-            var register = _registerServiceClient.CreateRegister(
-                new Register()
+            if (useregister.Length < 1)
+            {
+                // Create a register
+                var register = _registerServiceClient.CreateRegister(
+                    new Register()
+                    {
+                        Advertise = false,
+                        Name = "PingPong : " + DateTime.Now.ToString()
+                    }).Result;
+
+                registerId = register.Id;
+                Console.WriteLine($"Created new Register : {registerId}");
+            }
+            else
+            {
+                var reg = await _registerServiceClient.GetRegister(useregister);
+                if (reg != null)
                 {
-                    Advertise = false,
-                    Name = "ping pong register"
-                }).Result;
+                    registerId = useregister;
+                    Console.WriteLine($"Re Using Register : {useregister}");
+                }
+                else
+                    throw new Exception("Register Does Not Exist");
 
-            registerId = register.Id;
-            Console.WriteLine($"Created new Register : {registerId}");
-
+            }
             // create P1 & P2
             var wallet1 = await _walletServiceClient.CreateWallet("Ping Wallet");
             Console.WriteLine($"Created new Ping Wallet : {wallet1.Address}");
@@ -69,7 +86,7 @@ namespace CommTest.basic
             pongWallet = wallet2.Address;
 
             // Load and ammend the PingPong Blueprint, then publish it
-            var strbase = File.ReadAllText("pingpong.json");
+            var strbase = File.ReadAllText("pingpong/pingpong.json");
             var string1 = strbase.Replace("{{walletAddress1}}", pingWallet);
             var string2 = string1.Replace("{{walletAddress2}}", pongWallet);
 
@@ -96,7 +113,7 @@ namespace CommTest.basic
             throw new NotImplementedException();
         }
 
-        public async Task<TimeSpan> Go_PingPong(int rounds)
+        public async Task<TimeSpan> Go_PingPong(int rounds, int scale)
         {
             var pingpongStopwatch = new Stopwatch();
             pingpongStopwatch.Start();
@@ -140,10 +157,12 @@ namespace CommTest.basic
             Console.WriteLine($"\n\tConfirmed Start Action : {startAction.Description}");
 
             var tx = await _actionServiceClient.Submission(actionSubmit);
-            Console.WriteLine($"Processed Action {startAction.Title} on TxId : {tx.Id}");
+            Console.WriteLine($"Sending Inital Action {startAction.Title} on TxId : {tx.Id}");
 
-            Console.WriteLine(">>>>>> Press key to exit <<<<<<");
-            var input = Console.ReadKey();
+            while (executedRounds <= rounds )
+            {
+                Thread.Sleep(250);
+            }
 
             pingpongStopwatch.Stop();
             return pingpongStopwatch.Elapsed;
@@ -171,7 +190,8 @@ namespace CommTest.basic
 
                 var tx = await _actionServiceClient.Submission(actionSubmit);
 
-                Console.WriteLine($"Processed Action {nextAction.Title} on TxId : {tx.Id}");
+                Console.WriteLine($"Processed {executedRounds} Action {nextAction.Title} on TxId : {tx.Id}");
+                Interlocked.Increment(ref executedRounds);
             }
             catch (Exception er)
             {

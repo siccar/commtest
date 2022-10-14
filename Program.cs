@@ -14,6 +14,9 @@ using Siccar.Common.ServiceClients;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
 using Siccar.Common.Exceptions;
+using static Google.Rpc.Context.AttributeContext.Types;
+using Google.Api;
+using System.CommandLine;
 
 namespace CommTest.basic
 {
@@ -24,7 +27,7 @@ namespace CommTest.basic
 
         static async Task<int> Main(string[] args)
         {
-            Console.WriteLine("Siccar System Checker v1.0");
+            Console.WriteLine("Siccar System Checker v2.0");
 
             _configuration = SetupConfiguration();
 
@@ -54,12 +57,32 @@ namespace CommTest.basic
 
             var _serviceProvider = _host.Services.CreateScope().ServiceProvider;
 
+            int successorfail = await Connect(_serviceProvider);
+
+            if (successorfail > 0)
+                return successorfail;
+
+            // Create a Root Command (which only runs if there are no subcommands) and add SubCommands
+            var rootCommand = new RootCommand( "Siccar Communications and Test Tool");
+
+            // making heirarchical command structure
+            rootCommand.AddCommand(new Command("basic", "simple service tests")
+            {
+                new basic.BasicCommand("wallet", _serviceProvider),
+            });
+
+            rootCommand.AddCommand(new pingpong.PingPongCommand("pingpong", _serviceProvider));
+            return await rootCommand.InvokeAsync(args);
+        }
+
+        private static async Task<int> Connect(IServiceProvider serviceProvider)
+        {
             Console.WriteLine("Examining configuration and connectivity");
             var authn = new AuthN(_configuration);
 
-            var baseClient = _serviceProvider.GetService<SiccarBaseClient>();
+            var baseClient = serviceProvider.GetService<SiccarBaseClient>();
 
-            var tenantTests = new TenantTests(_serviceProvider);
+            var tenantTests = new TenantTests(serviceProvider);
             if (!tenantTests.CanConnect(_configuration["SiccarService"]))
             {
                 Console.WriteLine($"Test client cannot connect to installation : {_configuration["SiccarService"]}");
@@ -79,42 +102,9 @@ namespace CommTest.basic
                 }
 
                 await baseClient.SetBearerAsync(bearer);
+
+                return 0;
             }
-
-            // SIMPLE TESTS
-
-            Console.WriteLine("Running basic test...");
-
-            Console.WriteLine("\t Wallet tests");
-            var walletTest = new WalletTests(_serviceProvider, bearer);
-
-            var w1 = walletTest.Go_Basic();
-            Console.WriteLine($"\t completed : {w1.Milliseconds} ms");
-
-            walletTest.Dispose();
-
-            Console.WriteLine("\t Register tests");
-            var registerTest = new RegisterTests(_serviceProvider, bearer);
-
-            var r1 = registerTest.Go_Basic();
-
-            Console.WriteLine("Running PingPong test...");
-
-            int rounds = 10;
-            Console.WriteLine($"\t PingPong tests - {rounds}");
-            var pingpong = new PingPongTest(_serviceProvider, bearer);
-
-            TimeSpan t1 = TimeSpan.FromSeconds(0);
-
-            var bpTxId = await pingpong.SetupTest();
-            if (!string.IsNullOrEmpty(bpTxId))
-                t1 = await pingpong.Go_PingPong(rounds);
-
-            Console.WriteLine($"\t PingPong tests completed in {t1}");
-
-            // FINISHED
-            Console.WriteLine("Completed");
-            return 0;
         }
 
         private static IConfiguration SetupConfiguration()

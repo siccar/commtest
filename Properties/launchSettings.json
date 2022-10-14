@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CommTest": {
+      "commandName": "Project",
+      "commandLineArgs": "pingpong -r f5207376e461421988a32cf860e11b0e"
+    }
+  }
+}

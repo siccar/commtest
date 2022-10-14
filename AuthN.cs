@@ -17,12 +17,12 @@ namespace CommTest.basic
 {
     public class AuthN
     {
-        public ClaimsPrincipal claimsUser = null;
-        public IConfiguration configuration = null;
-        private UserAuthentication userAuthentication = null;
+        public ClaimsPrincipal claimsUser;
+        public IConfiguration configuration;
+        private UserAuthentication userAuthentication;
         private string serviceUri = "";
-        private DiscoveryDocumentResponse disco = null;
-        private HttpClient client = null;
+        private DiscoveryDocumentResponse disco;
+        private HttpClient client;
 
         public AuthN(IConfiguration config)
         {
