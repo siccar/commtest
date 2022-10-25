@@ -115,7 +115,7 @@
       ],
       "participants": [
         {
-          "Supplier": [ { "==": [ 0, 0 ] } ]
+          "25FD5262-932C-4B58-8E17-378B03AA818A": [ { "==": [ 0, 0 ] } ]
         }
       ],
       "disclosures": [
@@ -151,7 +151,11 @@
       "title": "Pong Action",
       "description": "P2 sends to P1",
       "sender": "91CC629C-DC4F-42CD-A54F-4BB201B14ECA",
-      "participants": [],
+      "participants": [
+        {
+          "91CC629C-DC4F-42CD-A54F-4BB201B14ECA": [ { "==": [ 0, 0 ] } ]
+        }
+      ],
       "dataSchemas": [
         {
           "$schema": "http://json-schema.org/draft-07/schema",
