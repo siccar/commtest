@@ -28,7 +28,7 @@ namespace CommTest.basic
             Console.WriteLine("\t Wallet tests");
             var walletTest = new WalletTests(_serviceProvider, bearer);
 
-            var w1 = walletTest.Go_Basic();
+            var w1 = await walletTest.Go_Basic();
             Console.WriteLine($"\t completed : {w1.Milliseconds} ms");
 
             walletTest.Dispose();

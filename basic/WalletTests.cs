@@ -21,13 +21,13 @@ namespace CommTest.basic
         }
 
 
-        public TimeSpan Go_Basic()
+        public async Task<TimeSpan> Go_Basic()
         {
             var walletStopwatch = new Stopwatch();
 
             walletStopwatch.Start();
 
-            var wallet1 = _walletServiceClient.CreateWallet("TestWallet_"+ DateTime.UtcNow).Result;
+            var wallet1 = await _walletServiceClient.CreateWallet("TestWallet_"+ DateTime.UtcNow);
 
             walletStopwatch.Stop();
 

@@ -11,7 +11,8 @@
       "title": "Siccar Endorsement",
       "description": "A boolean choice 'true' or 'false' ",
       "default": {
-        "endorse": false
+        "endorse": false,
+        "ballast": 0
       },
       "examples": [
         {
@@ -33,6 +34,13 @@
           "type": "string",
           "title": "textdata",
           "description": "Some text data."
+        },
+        "balast": {
+          "$id": "#/properties/ballast",
+          "type": "integer",
+          "title": "sizedata",
+          "description": "Size of payload",
+          "default": 0
         }
       },
       "additionalProperties": true
@@ -70,7 +78,8 @@
           "title": "Siccar Endorsement",
           "description": "A boolean choice 'true' or 'false' ",
           "default": {
-            "endorse": false
+            "endorse": false,
+            "ballast": 0
           },
           "examples": [
             {
@@ -92,6 +101,13 @@
               "type": "string",
               "title": "textdata",
               "description": "Some text data."
+            },
+            "balast": {
+              "$id": "#/properties/ballast",
+              "type": "integer",
+              "title": "sizedata",
+              "description": "Size of payload",
+              "default": 0
             }
           },
           "additionalProperties": true
@@ -107,7 +123,7 @@
           "participantAddress": "TrackingData",
           "dataPointers": [
             "endorse",
-            "textdata"
+            "ballast"
           ]
         },
         {
@@ -144,7 +160,8 @@
           "title": "Siccar Endorsement",
           "description": "A boolean choice 'true' or 'false' ",
           "default": {
-            "endorse": false
+            "endorse": false,
+            "ballast": 0
           },
           "examples": [
             {
@@ -166,6 +183,13 @@
               "type": "string",
               "title": "textdata",
               "description": "Some text data."
+            },
+            "balast": {
+              "$id": "#/properties/ballast",
+              "type": "integer",
+              "title": "sizedata",
+              "description": "Size of payload",
+              "default": 0
             }
           },
           "additionalProperties": true
@@ -176,7 +200,7 @@
           "participantAddress": "TrackingData",
           "dataPointers": [
             "endorse",
-            "textdata"
+            "ballast"
           ]
         },
         {

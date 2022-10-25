@@ -25,7 +25,8 @@ namespace CommTest.pingpong
         private string pongWallet = String.Empty;
         private string blueprintId = String.Empty;
 
-        private Random random = new Random();
+        private static Random random = new Random();
+        private int scaleSize = 0;
         private int rndFactor = 2; // choice of 2 will give balance, higer values wille skew bias
 
         private int executedRounds = 1;
@@ -115,8 +116,12 @@ namespace CommTest.pingpong
 
         public async Task<TimeSpan> Go_PingPong(int rounds, int scale)
         {
+            scaleSize = scale;
             var pingpongStopwatch = new Stopwatch();
             pingpongStopwatch.Start();
+
+            if (!isSetup)
+                throw new Exception("Please setup the test environment first.");
 
             Siccar.Application.Action? startAction = null;
             Console.Write($"Getting starting action:");
@@ -135,7 +140,7 @@ namespace CommTest.pingpong
                 }
                 Thread.Sleep(500); // wait for the tx to arrive
             }
-            
+
 
             ActionSubmission actionSubmit = new ActionSubmission()
             {
@@ -159,7 +164,7 @@ namespace CommTest.pingpong
             var tx = await _actionServiceClient.Submission(actionSubmit);
             Console.WriteLine($"Sending Inital Action {startAction.Title} on TxId : {tx.Id}");
 
-            while (executedRounds <= rounds )
+            while (executedRounds <= rounds)
             {
                 Thread.Sleep(250);
             }
@@ -175,22 +180,29 @@ namespace CommTest.pingpong
             if (txData.Sender == pongWallet)
                 stateWallet = pingWallet;
 
+            var oldBallast = int.Parse(txData.MetaData.TrackingData["ballast"]);
+
             try
             {
                 var nextAction = await _actionServiceClient.GetAction(txData.ToWallets.First(), txData.MetaData.RegisterId, txData.TransactionId);
 
+                int newSize = oldBallast + scaleSize;
                 ActionSubmission actionSubmit = new ActionSubmission()
                 {
                     BlueprintId = blueprintId,
                     RegisterId = registerId,
                     WalletAddress = stateWallet,
                     PreviousTxId = txData.TransactionId,
-                    Data = RandomEndorse(random.Next(rndFactor))
+                    Data = RandomEndorse(random.Next(rndFactor), newSize)
                 };
 
                 var tx = await _actionServiceClient.Submission(actionSubmit);
 
                 Console.WriteLine($"Processed {executedRounds} Action {nextAction.Title} on TxId : {tx.Id}");
+
+                if(scaleSize > 0)
+                    Console.WriteLine($"Ballast size : {newSize}");
+
                 Interlocked.Increment(ref executedRounds);
             }
             catch (Exception er)
@@ -198,16 +210,40 @@ namespace CommTest.pingpong
                 Console.WriteLine(er);
             }
         }
-        private JsonDocument RandomEndorse(int rnd)
+
+        private JsonDocument RandomEndorse(int rnd, int ballast = 0)
         {
             bool endorse = false;
 
             if (rnd > 0)
                 endorse = true;
 
-            string rndStr = "{ \"endorse\" : " + endorse.ToString().ToLower() + " }";
+            string rndStr = "{ \"endorse\" : " + endorse.ToString().ToLower();
 
-            return JsonDocument.Parse(rndStr);
+
+            if (ballast < 1)
+                rndStr += ", \"ballast\" : 0 }";
+            else
+            {
+                rndStr += $", \"ballast\" : \"{ballast}\" ";
+                rndStr += ", \"testdata\" : \"" + CreateString(ballast) + "\" }";
+            }
+
+            JsonDocument doc = JsonDocument.Parse(rndStr);
+            return doc;
+        }
+
+        internal static string CreateString(int stringLength)
+        {
+            const string allowedChars = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz0123456789!@$?_-";
+            char[] chars = new char[stringLength];
+
+            for (int i = 0; i < stringLength; i++)
+            {
+                chars[i] = allowedChars[random.Next(0, allowedChars.Length)];
+            }
+
+            return new string(chars);
         }
 
     }

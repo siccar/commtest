@@ -32,6 +32,9 @@ namespace CommTest.pingpong
 
             Console.WriteLine($"\t PingPong tests - {count}");
 
+            if (scale > 0)
+                Console.WriteLine($"\t Increasing the payload by {scale} characters");
+
             var pingpong = new PingPongTest(_serviceProvider, bearer);
 
             TimeSpan t1 = TimeSpan.FromSeconds(0);

@@ -2,7 +2,7 @@
   "profiles": {
     "CommTest": {
       "commandName": "Project",
-      "commandLineArgs": "pingpong -r f5207376e461421988a32cf860e11b0e"
+      "commandLineArgs": " pingpong -r b342bf1d84c749deb8fcd402afd78210 -s 1024"
     }
   }
 }

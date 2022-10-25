@@ -22,7 +22,7 @@ namespace CommTest.basic
 {
     class Program
     {
-        static IConfiguration _configuration;
+        private static IConfiguration _configuration;
         static string bearer = "";
 
         static async Task<int> Main(string[] args)

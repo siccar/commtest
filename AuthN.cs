@@ -19,8 +19,8 @@ namespace CommTest.basic
     {
         public ClaimsPrincipal claimsUser;
         public IConfiguration configuration;
-        private UserAuthentication userAuthentication;
-        private string serviceUri = "";
+        //private UserAuthentication userAuthentication;
+        //private string serviceUri = "";
         private DiscoveryDocumentResponse disco;
         private HttpClient client;
 
@@ -28,6 +28,7 @@ namespace CommTest.basic
         {
             configuration = config;
             client = new HttpClient();
+            claimsUser = new ClaimsPrincipal();   
             disco = client.GetDiscoveryDocumentAsync(configuration["SiccarService"]).Result;
         }
 
