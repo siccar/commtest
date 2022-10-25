@@ -114,7 +114,7 @@ namespace CommTest.pingpong
             throw new NotImplementedException();
         }
 
-        public async Task<TimeSpan> Go_PingPong(int rounds, int scale)
+        public async Task<TimeSpan> Go_PingPong(int rounds, int ballast, int scale)
         {
             scaleSize = scale;
             var pingpongStopwatch = new Stopwatch();
@@ -148,7 +148,7 @@ namespace CommTest.pingpong
                 RegisterId = registerId,
                 WalletAddress = pingWallet,
                 PreviousTxId = blueprintId,
-                Data = RandomEndorse(1)
+                Data = RandomEndorse(1, ballast)
             };
 
             await _actionServiceClient.StartEvents();
@@ -200,7 +200,7 @@ namespace CommTest.pingpong
 
                 Console.WriteLine($"Processed {executedRounds} Action {nextAction.Title} on TxId : {tx.Id}");
 
-                if(scaleSize > 0)
+                if (scaleSize > 0)
                     Console.WriteLine($"Ballast size : {newSize}");
 
                 Interlocked.Increment(ref executedRounds);
@@ -226,7 +226,7 @@ namespace CommTest.pingpong
             else
             {
                 rndStr += $", \"ballast\" : \"{ballast}\" ";
-                rndStr += ", \"testdata\" : \"" + CreateString(ballast) + "\" }";
+                rndStr += ", \"textdata\" : \"" + CreateString(ballast) + "\" }";
             }
 
             JsonDocument doc = JsonDocument.Parse(rndStr);
@@ -235,12 +235,12 @@ namespace CommTest.pingpong
 
         internal static string CreateString(int stringLength)
         {
-            const string allowedChars = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz0123456789!@$?_-";
+            const string allowedChars = "@@_this_is_a_repaeating_phrase!"; //"ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz0123456789!@$?_-"
             char[] chars = new char[stringLength];
 
             for (int i = 0; i < stringLength; i++)
             {
-                chars[i] = allowedChars[random.Next(0, allowedChars.Length)];
+                chars[i] = allowedChars[i % allowedChars.Length];
             }
 
             return new string(chars);

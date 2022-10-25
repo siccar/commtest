@@ -20,13 +20,14 @@ namespace CommTest.pingpong
             this.Add(new Option<int>(new string[] { "--count", "-c" }, getDefaultValue: () => 10, description: "Number of pingpong rounds"));
             this.Add(new Option<string>(new string[] { "--register", "-r" }, getDefaultValue: () => "", description: "ID of a Register to use"));
             this.Add(new Option<int>(new string[] { "--scale", "-s" }, getDefaultValue: () => 0, description: "An additional random text payload, size in characters"));
+            this.Add(new Option<int>(new string[] { "--ballast", "-b" }, getDefaultValue: () => 0, description: "An initial payload size"));
 
             _serviceProvider = services;
 
-            Handler = CommandHandler.Create<int, string, int>(RunPingPong);
+            Handler = CommandHandler.Create<int, string, int, int>(RunPingPong);
         }
 
-        private async Task RunPingPong(int count, string register, int scale)
+        private async Task RunPingPong(int count, string register, int ballast, int scale)
         {
             Console.WriteLine("Running PingPong test...");
 
@@ -41,7 +42,7 @@ namespace CommTest.pingpong
 
             var bpTxId = await pingpong.SetupTest(register);
             if (!string.IsNullOrEmpty(bpTxId))
-                t1 = await pingpong.Go_PingPong(count, scale);
+                t1 = await pingpong.Go_PingPong(count, ballast, scale);
 
             Console.WriteLine($"\t PingPong tests completed in {t1}");
         }
