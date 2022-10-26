@@ -235,12 +235,12 @@ namespace CommTest.pingpong
 
         internal static string CreateString(int stringLength)
         {
-            const string allowedChars = "@@_this_is_a_repaeating_phrase!"; //"ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz0123456789!@$?_-"
+            const string allowedChars = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz0123456789!@$?_-";
             char[] chars = new char[stringLength];
 
             for (int i = 0; i < stringLength; i++)
             {
-                chars[i] = allowedChars[i % allowedChars.Length];
+                chars[i] = allowedChars[random.Next(0, allowedChars.Length)];
             }
 
             return new string(chars);
