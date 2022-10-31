@@ -51,14 +51,14 @@
       "id": "25FD5262-932C-4B58-8E17-378B03AA818A",
       "name": "Ping Participant",
       "organisation": "Org1",
-      "walletAddress": "{{walletAddress1}}",
+      "walletAddress": "@@walletAddress0@@",
       "useStealthAddress": false
     },
     {
       "id": "91CC629C-DC4F-42CD-A54F-4BB201B14ECA",
       "name": "Pong Participant",
       "organisation": "Org1",
-      "walletAddress": "{{walletAddress2}}",
+      "walletAddress": "@@walletAddress1@@",
       "useStealthAddress": false
     }
   ],
@@ -127,7 +127,7 @@
           ]
         },
         {
-          "participantAddress": "{{walletAddress2}}",
+          "participantAddress": "@@walletAddress1@@",
           "dataPointers": [
             "endorse",
             "textdata"
@@ -208,7 +208,7 @@
           ]
         },
         {
-          "participantAddress": "{{walletAddress1}}",
+          "participantAddress": "@@walletAddress0@@",
           "dataPointers": [
             "endorse",
             "textdata"

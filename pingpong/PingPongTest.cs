@@ -6,6 +6,7 @@ using Siccar.Application;
 using Siccar.Platform;
 using System.Text.Json;
 using System.Diagnostics.Metrics;
+using System.Collections.Specialized;
 
 namespace CommTest.pingpong
 {
@@ -21,9 +22,8 @@ namespace CommTest.pingpong
         ActionServiceClient _actionServiceClient;
 
         private string registerId = String.Empty;
-        private string pingWallet = String.Empty;
-        private string pongWallet = String.Empty;
         private string blueprintId = String.Empty;
+        private List<Wallet> testWallets = new List<Wallet>();
 
         private static Random random = new Random();
         private int scaleSize = 0;
@@ -50,8 +50,10 @@ namespace CommTest.pingpong
         }
 
         // check we have everything we need
-        public async Task<string> SetupTest(string useregister)
+        public async Task<string> SetupTest(string useregister, int threads)
         {
+            bool reuse = false;
+
             if (useregister.Length < 1)
             {
                 // Create a register
@@ -59,7 +61,7 @@ namespace CommTest.pingpong
                     new Register()
                     {
                         Advertise = false,
-                        Name = "PingPong : " + DateTime.Now.ToString()
+                        Name = "PingPong Test : " + DateTime.Now.ToString()
                     }).Result;
 
                 registerId = register.Id;
@@ -72,34 +74,36 @@ namespace CommTest.pingpong
                 {
                     registerId = useregister;
                     Console.WriteLine($"Re Using Register : {useregister}");
+                    reuse = true;
                 }
                 else
                     throw new Exception("Register Does Not Exist");
 
             }
-            // create P1 & P2
-            var wallet1 = await _walletServiceClient.CreateWallet("Ping Wallet");
-            Console.WriteLine($"Created new Ping Wallet : {wallet1.Address}");
-            pingWallet = wallet1.Address;
+            // create Wallets
 
-            var wallet2 = await _walletServiceClient.CreateWallet("Pong Wallet");
-            Console.WriteLine($"Created new Pong Wallet : {wallet2.Address}");
-            pongWallet = wallet2.Address;
-
-            // Load and ammend the PingPong Blueprint, then publish it
-            var strbase = File.ReadAllText("pingpong/pingpong.json");
-            var string1 = strbase.Replace("{{walletAddress1}}", pingWallet);
-            var string2 = string1.Replace("{{walletAddress2}}", pongWallet);
-
-            JsonSerializerOptions serializerOptions = new(JsonSerializerDefaults.Web);
-
-            var blueprint = JsonSerializer.Deserialize<Blueprint>(string2, serializerOptions);
-
+            for(int i = 0; i < threads; i++)
+            {
+                Wallet newWallet = await _walletServiceClient.CreateWallet($"Test Wallet [{i}]");
+                testWallets.Add(newWallet);
+                Console.WriteLine($"Created new Wallet[{i}] : {testWallets[i].Address}");
+            }
+            
+            var blueprint = BuildBlueprint("pingpong/pingpong.json", testWallets);
+            
             // is it worth writing a debug copy?
 
             // what no blueprint service client
-            var bpTxId = await _blueprintServiceClient.PublishBlueprint(pingWallet, registerId, blueprint);
-
+            RawTransaction bpTxId;
+            if (reuse)
+            {
+                Console.WriteLine($"Not currently reusing Blueprint");
+            }
+            if (testWallets.Count<1)
+            {
+                throw new Exception("Must run a number of threads/wallets");
+            }
+            bpTxId = await _blueprintServiceClient.PublishBlueprint(testWallets[0].Address, registerId, blueprint);
 
             Console.WriteLine($"Blueprint created and published, TXId  : {bpTxId.Id}");
 
@@ -107,6 +111,29 @@ namespace CommTest.pingpong
 
             isSetup = true;
             return bpTxId.Id;
+        }
+
+        /// <summary>
+        /// Build Blueprint
+        /// 
+        /// The idea is to load any Blueprint template and replace the wallet addresses with those in the generated list
+        /// </summary>
+        /// <param name="template"></param>
+        /// <param name="testWallets"></param>
+        /// <returns></returns>
+        private Blueprint BuildBlueprint(string template, List<Wallet> testWallets)
+        {
+            // Load and ammend the PingPong Blueprint, then publish it
+            var strbase = File.ReadAllText("pingpong/pingpong.json");
+
+            for (int i = 0; i < testWallets.Count; i++)
+            {
+                strbase = strbase.Replace($"@@walletAddress{i}@@", testWallets[i].Address);
+            }
+
+            JsonSerializerOptions serializerOptions = new(JsonSerializerDefaults.Web);
+
+            return JsonSerializer.Deserialize<Blueprint>(strbase, serializerOptions);
         }
 
         public void Dispose()
@@ -132,7 +159,7 @@ namespace CommTest.pingpong
 
                 try
                 {
-                    startAction = await _actionServiceClient.GetAction(pingWallet, registerId, blueprintId);
+                    startAction = await _actionServiceClient.GetAction(testWallets[0].Address, registerId, blueprintId);
                 }
                 catch (Exception er)
                 {
@@ -146,7 +173,7 @@ namespace CommTest.pingpong
             {
                 BlueprintId = blueprintId,
                 RegisterId = registerId,
-                WalletAddress = pingWallet,
+                WalletAddress = testWallets[0].Address,
                 PreviousTxId = blueprintId,
                 Data = RandomEndorse(1, ballast)
             };
@@ -155,8 +182,8 @@ namespace CommTest.pingpong
 
             _actionServiceClient.OnConfirmed += ProcessEvent;
 
-            await _actionServiceClient.SubscribeWallet(pingWallet);
-            await _actionServiceClient.SubscribeWallet(pongWallet);
+            await _actionServiceClient.SubscribeWallet(testWallets[0].Address);
+            await _actionServiceClient.SubscribeWallet(testWallets[1].Address);
 
 
             Console.WriteLine($"\n\tConfirmed Start Action : {startAction.Description}");
@@ -164,9 +191,16 @@ namespace CommTest.pingpong
             var tx = await _actionServiceClient.Submission(actionSubmit);
             Console.WriteLine($"Sending Inital Action {startAction.Title} on TxId : {tx.Id}");
 
-            while (executedRounds <= rounds)
+            if (rounds != 0)
             {
-                Thread.Sleep(250);
+                while (executedRounds <= rounds)
+                {
+                    Thread.Sleep(250);
+                }
+            }
+            else
+            {
+                Console.ReadKey(true);
             }
 
             pingpongStopwatch.Stop();
@@ -175,10 +209,8 @@ namespace CommTest.pingpong
 
         public async Task ProcessEvent(TransactionConfirmed txData)
         {
-            var stateWallet = pongWallet;
 
-            if (txData.Sender == pongWallet)
-                stateWallet = pingWallet;
+            var thisWallet = txData.ToWallets.First();
 
             var oldBallast = int.Parse(txData.MetaData.TrackingData["ballast"]);
 
@@ -191,7 +223,7 @@ namespace CommTest.pingpong
                 {
                     BlueprintId = blueprintId,
                     RegisterId = registerId,
-                    WalletAddress = stateWallet,
+                    WalletAddress = thisWallet,
                     PreviousTxId = txData.TransactionId,
                     Data = RandomEndorse(random.Next(rndFactor), newSize)
                 };
@@ -199,17 +231,25 @@ namespace CommTest.pingpong
                 var tx = await _actionServiceClient.Submission(actionSubmit);
 
                 Console.WriteLine($"Processed {executedRounds} Action {nextAction.Title} on TxId : {tx.Id}");
+                Interlocked.Increment(ref executedRounds);
 
                 if (scaleSize > 0)
                     Console.WriteLine($"Ballast size : {newSize}");
 
-                Interlocked.Increment(ref executedRounds);
             }
             catch (Exception er)
             {
                 Console.WriteLine(er);
             }
         }
+
+
+        /// <summary>
+        /// RandomEndorse - generates payloads with a random Endorse Flag
+        /// </summary>
+        /// <param name="rnd"></param>
+        /// <param name="ballast"></param>
+        /// <returns></returns>
 
         private JsonDocument RandomEndorse(int rnd, int ballast = 0)
         {

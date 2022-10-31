@@ -2,7 +2,7 @@
   "profiles": {
     "CommTest": {
       "commandName": "Project",
-      "commandLineArgs": " pingpong -s 1024"
+      "commandLineArgs": " pingpong"
     }
   }
 }
