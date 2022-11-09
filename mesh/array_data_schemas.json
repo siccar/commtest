@@ -1,0 +1,45 @@
+{
+  "dataSchemas": [
+    {
+      "$id": "https://siccar.net/schema/testendorse.json",
+      "$schema": "http://json-schema.org/draft-07/schema",
+      "additionalProperties": true,
+      "default": {
+        "endorse": false,
+        "ballast": 0
+      },
+      "description": "A boolean choice true or false ",
+      "examples": [
+        {
+          "endorse": true
+        }
+      ],
+      "properties": {
+        "endorse": {
+          "$id": "#/properties/endorse",
+          "type": "boolean",
+          "title": "Endorsement",
+          "description": "Do you endorse the presented data?"
+        },
+        "textdata": {
+          "$id": "#/properties/textdata",
+          "type": "string",
+          "title": "textdata",
+          "description": "Some text data."
+        },
+        "balast": {
+          "$id": "#/properties/ballast",
+          "type": "integer",
+          "title": "sizedata",
+          "description": "Size of payload",
+          "default": 0
+        }
+      },
+      "required": [
+        "endorse"
+      ],
+      "title": "Siccar Test Endorsement",
+      "type": "object"
+    }
+  ]
+}

@@ -63,12 +63,18 @@ namespace CommTest.basic
                 return successorfail;
 
             // Create a Root Command (which only runs if there are no subcommands) and add SubCommands
-            var rootCommand = new RootCommand( "Siccar Communications and Test Tool");
+            var rootCommand = new RootCommand("Siccar Communications and Test Tool");
 
             // making heirarchical command structure
             rootCommand.AddCommand(new Command("basic", "simple service tests")
             {
                 new basic.BasicCommand("wallet", _serviceProvider),
+            });
+            rootCommand.AddCommand(new Command("mesh", "Mesh transaction test")
+            {
+                new mesh.MeshSetupCommand("setup", _host.Services),
+                new mesh.MeshRunCommand("run", _host.Services),
+                 new mesh.MeshBuildBPCommand("build", _host.Services)
             });
 
             rootCommand.AddCommand(new pingpong.PingPongCommand("pingpong", _serviceProvider));
@@ -98,10 +104,12 @@ namespace CommTest.basic
                 if (string.IsNullOrWhiteSpace(bearer))
                 {
                     Console.WriteLine($"Test client cannot continue.");
-                    return -1;
+                    return 1;
                 }
 
                 await baseClient.SetBearerAsync(bearer);
+
+                Console.WriteLine($"Using Token : {bearer}");
 
                 return 0;
             }
@@ -123,16 +131,15 @@ namespace CommTest.basic
                // {"SiccarService", "https://n0.siccar.dev/"},
                 {"SiccarService", "https://localhost:8443/"},
                 {"clientId", "siccar-admin-ui-client"},
-                {"clientSecret", "secret"},
-                {"Scope", "installation.admin tenant.admin"}
+                {"Scope", "installation.admin tenant.admin register.creator wallet.user"}
             };
 
             // get config - but for the moment just use default CLI Providers
             return new ConfigurationBuilder()
                         .AddInMemoryCollection(defaulConfig)
+                        .AddJsonFile(appSettingsPath, optional: true, reloadOnChange: true)
                         .SetBasePath(System.IO.Directory.GetCurrentDirectory())
                         .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                        .AddJsonFile(appSettingsPath, optional: true, reloadOnChange: true)
                         .AddEnvironmentVariables()
                         .Build();
         }

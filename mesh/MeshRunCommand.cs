@@ -8,19 +8,21 @@ using System.Threading.Tasks;
 
 namespace CommTest.mesh
 {
-    public class MeshCommand : Command
+    public class MeshRunCommand : Command
     {
         IServiceProvider _serviceProvider;
         string bearer = "";
 
-        public MeshCommand(string action, IServiceProvider services) : base(action)
+        public MeshRunCommand(string action, IServiceProvider services) : base(action)
         {
-            this.Name = "mash";
+            this.Name = "run";
             this.Description = "Runs a simple action test that excersizes the stack.";
 
             //this.Add(new Option<int>(new string[] { "--count", "-c" }, getDefaultValue: () => 10, description: "Number of pingpong rounds"));
             //this.Add(new Option<int>(new string[] { "--threads", "-t" }, getDefaultValue: () => 2, description: "Number wallet threads to run in parallel"));
-            this.Add(new Option<string>(new string[] { "--register", "-r" }, getDefaultValue: () => "", description: "ID of a Register to use"));
+            this.Add(new Argument<string>("register", getDefaultValue: () => "", description: "Register ID to use"));
+            this.Add(new Argument<string>("transaction", getDefaultValue: () => "", description: "Blueprint Transaction Id"));
+            this.Add(new Argument<int>("nodeId", getDefaultValue: () => 1, description: "ID of a Participant to use"));
             //this.Add(new Option<int>(new string[] { "--scale", "-s" }, getDefaultValue: () => 0, description: "An additional random text payload, size in characters"));
             this.Add(new Option<int>(new string[] { "--ballast", "-b" }, getDefaultValue: () => 0, description: "An initial payload size"));
 
@@ -32,6 +34,8 @@ namespace CommTest.mesh
         private async Task RunMesh( string register, int ballast)
         {
             Console.WriteLine("Running Mesh test...");
+
+            Console.WriteLine("Checking Register for Blueprint...");
 
 
             Console.WriteLine($"\t Starting payload is {ballast} characters");
@@ -45,7 +49,7 @@ namespace CommTest.mesh
             //if (!string.IsNullOrEmpty(bpTxId))
             //    t1 = await pingpong.Go_PingPong(count, ballast, scale);
 
-            Console.WriteLine($"\t PingPong tests completed in {t1}");
+            Console.WriteLine($"\t Mesh tests completed in {t1}");
         }
     }
 }

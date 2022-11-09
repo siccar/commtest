@@ -46,8 +46,8 @@ namespace CommTest.basic
             {
                 Address = devConnect,
                 ClientId = "siccar-integration-client", //,
-                ClientSecret = "siccar-integration-secret",
-                Scope = "openid wallet.admin"
+               // ClientSecret = "secret",
+                Scope = "openid profile installation.admin tenant.admin wallet.user"
             });
 
             if (result.IsError)
@@ -76,7 +76,8 @@ namespace CommTest.basic
 
                 ClientId = configuration["clientId"],
                 ClientSecret = configuration["clientSecret"],
-                Scope = "wallet.admin"
+                Scope = "installation.admin tenant.admin register.creator wallet.user"
+               
             });
 
             if (tokenResponse.IsError)

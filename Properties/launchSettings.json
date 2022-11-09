@@ -2,7 +2,7 @@
   "profiles": {
     "CommTest": {
       "commandName": "Project",
-      "commandLineArgs": " pingpong"
+      "commandLineArgs": "mesh setup"
     }
   }
 }
