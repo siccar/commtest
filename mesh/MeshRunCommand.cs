@@ -28,10 +28,10 @@ namespace CommTest.mesh
 
             _serviceProvider = services;
 
-            Handler = CommandHandler.Create<string, int>(RunMesh);
+            Handler = CommandHandler.Create<string, string, int>(RunMesh);
         }
 
-        private async Task RunMesh( string register, int ballast)
+        private async Task RunMesh(string register, string transaction, int ballast)
         {
             Console.WriteLine("Running Mesh test...");
 
