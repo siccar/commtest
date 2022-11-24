@@ -76,7 +76,7 @@ namespace CommTest.basic
 
                 ClientId = configuration["clientId"],
                 ClientSecret = configuration["clientSecret"],
-                Scope = "installation.admin tenant.admin register.creator wallet.user"
+                Scope = "installation.admin tenant.admin blueprint.admin register.admin wallet.user"
                
             });
 

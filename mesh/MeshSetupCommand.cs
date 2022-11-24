@@ -93,7 +93,7 @@ namespace CommTest.mesh
                 Wallet newWallet = await _walletServiceClient.CreateWallet($"Test Wallet [{i}]", $"A Mesh Test Wallet Number : {i}");
                 newParticipant.WalletAddress = newWallet.Address;
                 testParticipants.Add(newParticipant);
-                Console.WriteLine($"Created new Participant [{i}] : {testParticipants[i].WalletAddress}");
+                Console.WriteLine($"Created new Participant [{i-1}] : {testParticipants[i-1].WalletAddress}");
             }
 
             var bpBuilder = new BuildMeshBlueprint();
@@ -109,7 +109,7 @@ namespace CommTest.mesh
 
                 Console.WriteLine($"Test initialized,  for each participant 'n' execute an instance :");
 
-                Console.WriteLine($"\n\t ./CommTest.exe mesh run -p <n> -r {useRegister.Id} -t {bpTxId.Id}\n");
+                Console.WriteLine($"\n\t ./CommTest.exe mesh run {useRegister.Id} {bpTxId.Id} <node>\n");
             }
             catch(Exception er)
             {
