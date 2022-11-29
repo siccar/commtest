@@ -109,7 +109,12 @@ namespace CommTest.mesh
 
                 Console.WriteLine($"Test initialized,  for each participant 'n' execute an instance :");
 
-                Console.WriteLine($"\n\t ./CommTest.exe mesh run {useRegister.Id} {bpTxId.Id} <node>\n");
+                int i = 1;
+                foreach(var w in testParticipants)
+                {
+                    Console.WriteLine($"\n\t ./CommTest.exe mesh run {i++} {w.WalletAddress} {useRegister.Id} {bpTxId.Id}\n");
+                }
+                
             }
             catch(Exception er)
             {

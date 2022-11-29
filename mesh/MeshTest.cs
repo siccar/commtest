@@ -25,7 +25,8 @@ namespace CommTest.mesh
 
         private string registerId = String.Empty;
         private string blueprintId = String.Empty;
-        private List<Wallet> testParticipants = new List<Wallet>();
+        private string myWallet = string.Empty;
+        private List<string> testParticipants = new List<string>();
 
         private static Random random = new Random();
         private int scaleSize = 0;
@@ -52,76 +53,79 @@ namespace CommTest.mesh
         }
 
         // check we have everything we need
- 
+
         public void Dispose()
         {
             throw new NotImplementedException();
         }
 
-        public async Task<TimeSpan> Go_PingPong(int rounds, int ballast, int scale)
+
+        public void Setup_Test(string MyWallet, string Register, string BlueprintId)
+        {
+            myWallet = MyWallet;
+            registerId = Register;
+            blueprintId = BlueprintId;
+            isSetup = true;
+        }
+
+        // run as a single thread per instance
+        public async Task<TimeSpan> Run_Test(int node, int ballast, int scale = 0)
         {
             scaleSize = scale;
-            var pingpongStopwatch = new Stopwatch();
-            pingpongStopwatch.Start();
+            var testStopwatch = new Stopwatch();
+            testStopwatch.Start();
 
             if (!isSetup)
                 throw new Exception("Please setup the test environment first.");
 
             Siccar.Application.Action? startAction = null;
-            Console.Write($"Getting starting action:");
-            // we start by manually firing the get first action, ping
-            while (startAction == null)
-            {
-                Console.Write($".");
 
-                try
-                {
-                    startAction = await _actionServiceClient.GetAction(testParticipants[0].Address, registerId, blueprintId);
-                }
-                catch (Exception er)
-                {
-
-                }
-                Thread.Sleep(500); // wait for the tx to arrive
-            }
-
-
-            ActionSubmission actionSubmit = new ActionSubmission()
-            {
-                BlueprintId = blueprintId,
-                RegisterId = registerId,
-                WalletAddress = testParticipants[0].Address,
-                PreviousTxId = blueprintId,
-                Data = RandomEndorse(1, ballast)
-            };
-
+            // setup comms
             await _actionServiceClient.StartEvents();
 
             _actionServiceClient.OnConfirmed += ProcessEvent;
+            await _actionServiceClient.SubscribeWallet(myWallet);
 
-            await _actionServiceClient.SubscribeWallet(testParticipants[0].Address);
-            await _actionServiceClient.SubscribeWallet(testParticipants[1].Address);
-
-
-            Console.WriteLine($"\n\tConfirmed Start Action : {startAction.Description}");
-
-            var tx = await _actionServiceClient.Submission(actionSubmit);
-            Console.WriteLine($"Sending Inital Action {startAction.Title} on TxId : {tx.Id}");
-
-            if (rounds != 0)
+            if (node == 1)
             {
-                while (executedRounds <= rounds)
+                Console.Write($"Getting starting action:");
+                // we start by manually firing the get first action, ping
+                while (startAction == null)
                 {
-                    Thread.Sleep(250);
+                    Console.Write($".");
+
+                    try
+                    {
+                        startAction = await _actionServiceClient.GetAction(myWallet, registerId, blueprintId);
+                    }
+                    catch (Exception er)
+                    {
+
+                    }
+                    Thread.Sleep(500); // wait for the tx to arrive
                 }
-            }
-            else
-            {
-                Console.ReadKey(true);
+
+                ActionSubmission actionSubmit = new ActionSubmission()
+                {
+                    BlueprintId = blueprintId,
+                    RegisterId = registerId,
+                    WalletAddress = myWallet,
+                    PreviousTxId = blueprintId,
+                    Data = RandomEndorse(1, ballast)
+                };
+
+                Console.WriteLine($"\n\tConfirmed Start Action : {startAction.Description}");
+
+                var tx = await _actionServiceClient.Submission(actionSubmit);
+                Console.WriteLine($"Sending Inital Action {startAction.Title} on TxId : {tx.Id}");
             }
 
-            pingpongStopwatch.Stop();
-            return pingpongStopwatch.Elapsed;
+            Console.WriteLine("# Press a key to exit.");
+            Console.ReadKey(true);
+
+
+            testStopwatch.Stop();
+            return testStopwatch.Elapsed;
         }
 
         public async Task ProcessEvent(TransactionConfirmed txData)
