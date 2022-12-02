@@ -47,7 +47,7 @@ namespace CommTest.basic
                 Address = devConnect,
                 ClientId = "siccar-integration-client", //,
                // ClientSecret = "secret",
-                Scope = "openid profile installation.admin tenant.admin wallet.user"
+                Scope = "openid profile installation.admin blueprint.admin register.creator tenant.admin wallet.user"
             });
 
             if (result.IsError)
@@ -76,7 +76,7 @@ namespace CommTest.basic
 
                 ClientId = configuration["clientId"],
                 ClientSecret = configuration["clientSecret"],
-                Scope = "installation.admin tenant.admin blueprint.admin register.admin wallet.user"
+                Scope = "installation.admin tenant.admin blueprint.admin register.creator wallet.user"
                
             });
 

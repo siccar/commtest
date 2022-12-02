@@ -53,6 +53,7 @@ namespace CommTest.pingpong
         public async Task<string> SetupTest(string useregister, int threads)
         {
             bool reuse = false;
+            Console.WriteLine("Initialising Register:");
 
             if (useregister.Length < 1)
             {
@@ -81,8 +82,8 @@ namespace CommTest.pingpong
 
             }
             // create Wallets
-
-            for(int i = 0; i < threads; i++)
+            Console.WriteLine("Initialising Wallets:");
+            for (int i = 0; i < threads; i++)
             {
                 Wallet newWallet = await _walletServiceClient.CreateWallet($"Test Wallet [{i}]");
                 testWallets.Add(newWallet);

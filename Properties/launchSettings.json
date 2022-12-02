@@ -2,7 +2,7 @@
   "profiles": {
     "CommTest": {
       "commandName": "Project",
-      "commandLineArgs": "mesh run 1 ws1j7atq80kfc5npjw4agpy7pwhumtn34dpe2dux6prrxtmrsqxfrlwszgcesd 03cbb8a8a86640e08b604577592c007e 9b86e813-eb52-4d3d-a533-a8d2de7f3b12"
+      "commandLineArgs": "pingpong"
     }
   }
 }
