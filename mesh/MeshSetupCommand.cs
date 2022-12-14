@@ -102,7 +102,7 @@ namespace CommTest.mesh
             // is it worth writing a debug copy?
 
             // what no blueprint service client
-            RawTransaction bpTxId;
+            TransactionModel bpTxId;
             try
             {
                 bpTxId = await _blueprintServiceClient.PublishBlueprint(testParticipants[0].WalletAddress, useRegister.Id, blueprint);

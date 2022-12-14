@@ -96,7 +96,7 @@ namespace CommTest.pingpong
             // is it worth writing a debug copy?
 
             // what no blueprint service client
-            RawTransaction bpTxId;
+            TransactionModel bpTxId;
             if (reuse)
             {
                 Console.WriteLine($"Not currently reusing Blueprint");
