@@ -12,11 +12,11 @@ namespace CommTest.pingpong
         IServiceProvider _serviceProvider;
         string bearer = "";
 
-        public PingPongCommand(string action, IServiceProvider services) : base(action)
+        public PingPongCommand(string action, IServiceProvider services, string _bearer) : base(action)
         {
             this.Name = "pingpong";
             this.Description = "Runs a simple action test that excersizes the stack.";
-
+            bearer = _bearer;
             this.Add(new Option<int>(new string[] { "--count", "-c" }, getDefaultValue: () => 10, description: "Number of pingpong rounds"));
             this.Add(new Option<int>(new string[] { "--threads", "-t" }, getDefaultValue: () => 2, description: "Number wallet threads to run in parallel"));
             this.Add(new Option<string>(new string[] { "--register", "-r" }, getDefaultValue: () => "", description: "ID of a Register to use"));

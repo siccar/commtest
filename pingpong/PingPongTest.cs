@@ -31,6 +31,7 @@ namespace CommTest.pingpong
 
         private int executedRounds = 1;
         private bool isSetup = false;
+        private string _bearer = "";
 
         public PingPongTest(IServiceProvider serviceProvider, string bearer)
         {
@@ -46,7 +47,7 @@ namespace CommTest.pingpong
             _registerServiceClient = (RegisterServiceClient)serviceProvider.GetService<IRegisterServiceClient>();
             if (_registerServiceClient == null)
                 throw new Exception("Cannot instanciate service client [RegisterServiceClient]");
-
+            _bearer = bearer;
         }
 
         // check we have everything we need
@@ -179,6 +180,7 @@ namespace CommTest.pingpong
                 Data = RandomEndorse(1, ballast)
             };
 
+            await _actionServiceClient.SetBearerAsync(_bearer);
             await _actionServiceClient.StartEvents();
 
             _actionServiceClient.OnConfirmed += ProcessEvent;
