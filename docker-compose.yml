@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  commtest:
+    image: ${DOCKER_REGISTRY-}commtest
+    build:
+      context: .
+      dockerfile: Dockerfile
