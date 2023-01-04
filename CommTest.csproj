@@ -39,7 +39,7 @@
 	  <None Include=".docker\docker-compose.override.yml">
 	    <DependentUpon>docker-compose.yml</DependentUpon>
 	  </None>
-	  <None Include=".docker\docker-compose.yml" />
+	  <None Include=".docker\docker-compose.yaml" />
 	</ItemGroup>
 
 </Project>
