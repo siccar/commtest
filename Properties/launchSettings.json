@@ -2,7 +2,10 @@
   "profiles": {
     "CommTest": {
       "commandName": "Project",
-      "commandLineArgs": "pingpong"
+      "commandLineArgs": "pingpong -r 40f52b55219a471884a2ef54c8a45145"
+    },
+    "Docker": {
+      "commandName": "Docker"
     }
   }
 }
