@@ -2,7 +2,7 @@
   "profiles": {
     "CommTest": {
       "commandName": "Project",
-      "commandLineArgs": "pingpong -r 40f52b55219a471884a2ef54c8a45145 -c 0"
+      "commandLineArgs": "mesh setup -p 3 "
     },
     "Docker": {
       "commandName": "Docker"

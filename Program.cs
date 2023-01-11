@@ -74,7 +74,7 @@ namespace CommTest.basic
             {
                 new mesh.MeshSetupCommand("setup", _host.Services),
                 new mesh.MeshRunCommand("run", _host.Services),
-                new mesh.MeshBuildBPCommand("build", _host.Services)
+                //new mesh.MeshBuildBPCommand("build", _host.Services)
             });
 
             rootCommand.AddCommand(new pingpong.PingPongCommand("pingpong", _serviceProvider, bearer));

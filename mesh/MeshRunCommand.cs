@@ -52,24 +52,22 @@ namespace CommTest.mesh
             Handler = CommandHandler.Create<int, string, string, string, int>(RunMesh);
         }
 
-        private async Task RunMesh(int nodeId, string walletAddress, string register, string blueprintId, int ballast)
+        private async Task RunMesh(int nodeId, string walletAddress, string register, string transaction, int ballast)
         {
             Console.WriteLine("Running Mesh test...");
 
             Console.WriteLine("Checking Register for Blueprint...");
-
-            var bps = await _blueprintServiceClient.GetAllPublished(walletAddress, register);
-            
+   
             Console.WriteLine($"\t Starting payload is {ballast} characters");
 
-
             var thisTest = new MeshTest(serviceProvider, bearer);
-            thisTest.Setup_Test(walletAddress, register, blueprintId);
-
+            thisTest.Setup_Test(walletAddress, register, transaction);
+            Thread.Sleep(1000);
             TimeSpan t1 = TimeSpan.FromSeconds(0);
 
             t1 = await thisTest.Run_Test(nodeId, ballast);
 
+            
             Console.WriteLine($"\t Mesh tests completed in {t1}");
         }
     }

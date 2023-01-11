@@ -22,6 +22,7 @@ namespace CommTest.mesh
         WalletServiceClient _walletServiceClient;
         RegisterServiceClient _registerServiceClient;
         ActionServiceClient _actionServiceClient;
+        TenantServiceClient _tenantServiceClient;
         private List<Participant> testParticipants = new List<Participant>();
 
         public MeshSetupCommand(string action, IServiceProvider services) : base(action)
@@ -31,6 +32,8 @@ namespace CommTest.mesh
 
             this.Add(new Option<int>(new string[] { "--participants", "-p" }, getDefaultValue: () => 2, description: "Number Participants to create"));
             this.Add(new Option<string>(new string[] { "--register", "-r" }, getDefaultValue: () => "", description: "ID of a Register to use"));
+            this.Add(new Option<bool>(new string[] { "--file", "-f" }, getDefaultValue: () => false, description: "Output the Meshtest Blueprint"));
+            this.Add(new Option<bool>(new string[] { "--no_publish", "-n" }, getDefaultValue: () => false, description: "Do not publish to a register"));
             serviceProvider = services;
 
             _actionServiceClient = (ActionServiceClient)serviceProvider.GetService<IActionServiceClient>();
@@ -45,18 +48,21 @@ namespace CommTest.mesh
             _registerServiceClient = (RegisterServiceClient)serviceProvider.GetService<IRegisterServiceClient>();
             if (_registerServiceClient == null)
                 throw new Exception("Cannot instanciate service client [RegisterServiceClient]");
+            _tenantServiceClient = serviceProvider.GetService<ITenantServiceClient>() as TenantServiceClient;
+            if (_tenantServiceClient == null)
+                throw new Exception("Cannot instanciate service client [TenantServiceClient]");
 
-
-            Handler = CommandHandler.Create<int, string>(SetupMesh);
+            Handler = CommandHandler.Create<int, string, bool, bool>(SetupMesh);
         }
 
-        private async Task SetupMesh(int participants, string register)
+        private async Task SetupMesh(int participants, string register, bool file, bool no_publish)
         {
+
             Console.WriteLine("Creating the Mesh test...");
-            Register useRegister;
+            Register useRegister = new Register();
             bool reuse = false;
 
-            if (string.IsNullOrEmpty(register))
+            if (string.IsNullOrEmpty(register) && !no_publish)
             {
                 // Create a register
                 useRegister = _registerServiceClient.CreateRegister(
@@ -66,9 +72,11 @@ namespace CommTest.mesh
                         Name = "Mesh Test : " + DateTime.Now.ToString()
                     }).Result;
 
+                register = useRegister.Id;
+
                 Console.WriteLine($"Created new Register : {useRegister.Id}");
             }
-            else
+            else if(!no_publish)
             {
                 useRegister = await _registerServiceClient.GetRegister(register);
                 if (useRegister != null)
@@ -90,38 +98,54 @@ namespace CommTest.mesh
                 Participant newParticipant = new Participant();
                 newParticipant.Name = $"Mesh Test Participant {i}";
                 newParticipant.Organisation = "Mesh Test Org";
-                Wallet newWallet = await _walletServiceClient.CreateWallet($"Test Wallet [{i}]", $"A Mesh Test Wallet Number : {i}");
+                Wallet newWallet = await _walletServiceClient.CreateWallet($"Test Wallet [{i}]", $"Mesh Test Wallet Number : {i}");
                 newParticipant.WalletAddress = newWallet.Address;
                 testParticipants.Add(newParticipant);
-                Console.WriteLine($"Created new Participant [{i-1}] : {testParticipants[i-1].WalletAddress}");
+                if (!no_publish)
+                {
+                    var partId = await _tenantServiceClient.PublishParticipant(register, newWallet.Address, newParticipant);
+                    Console.WriteLine($"Created new Participant [{i - 1}] : {testParticipants[i - 1].WalletAddress}  in Transaction {partId.TxId}");
+                }
             }
 
             var bpBuilder = new BuildMeshBlueprint();
             var blueprint = bpBuilder.Build(testParticipants);
 
             // is it worth writing a debug copy?
+            if (file)
+            {
+                var jopts = new JsonSerializerOptions(JsonSerializerDefaults.Web)
+                {
+                    WriteIndented = true,
+                    AllowTrailingCommas = true
+                };
+                File.WriteAllText("Mesh_Test.json", JsonSerializer.Serialize(blueprint, jopts));
+            }
 
             // what no blueprint service client
             TransactionModel bpTxId;
-            try
+            if (!no_publish)
             {
-                bpTxId = await _blueprintServiceClient.PublishBlueprint(testParticipants[0].WalletAddress, useRegister.Id, blueprint);
-
-                Console.WriteLine($"Test initialized,  for each participant 'n' execute an instance :");
-
-                int i = 1;
-                foreach(var w in testParticipants)
+                try
                 {
-                    Console.WriteLine($"\n\t ./CommTest.exe mesh run {i++} {w.WalletAddress} {useRegister.Id} {bpTxId.Id}\n");
+                    bpTxId = await _blueprintServiceClient.PublishBlueprint(testParticipants[0].WalletAddress, useRegister.Id, blueprint);
+
+                    Console.WriteLine($"Test initialized,  for each participant 'n' execute an instance :");
+
+                    int i = 1;
+                    foreach (var w in testParticipants)
+                    {
+                        Console.WriteLine($"\n\t ./CommTest.exe mesh run {i++} {w.WalletAddress} {useRegister.Id} {bpTxId.Id}\n");
+                    }
+
                 }
-                
-            }
-            catch(Exception er)
-            {
-                Console.WriteLine($"Test initialized Failed {er.Message}");
+                catch (Exception er)
+                {
+                    Console.WriteLine($"Test initialized Failed {er.Message}");
+                }
             }
         }
 
-  
+
     }
 }

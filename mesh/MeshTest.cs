@@ -26,7 +26,9 @@ namespace CommTest.mesh
         private string registerId = String.Empty;
         private string blueprintId = String.Empty;
         private string myWallet = string.Empty;
+        private string nextWallet = string.Empty;
         private List<string> testParticipants = new List<string>();
+        private Blueprint testBlueprint = new Blueprint();
 
         private static Random random = new Random();
         private int scaleSize = 0;
@@ -60,11 +62,15 @@ namespace CommTest.mesh
         }
 
 
-        public void Setup_Test(string MyWallet, string Register, string BlueprintId)
+        public async void Setup_Test(string MyWallet, string Register, string BlueprintId)
         {
             myWallet = MyWallet;
             registerId = Register;
             blueprintId = BlueprintId;
+
+            var testBlueprints = await _blueprintServiceClient.GetAllPublished(Register);
+            testBlueprint = testBlueprints.Last();
+
             isSetup = true;
         }
 
@@ -78,13 +84,22 @@ namespace CommTest.mesh
             if (!isSetup)
                 throw new Exception("Please setup the test environment first.");
 
+            // workout the next wallet address from the blueprint
+            int nextPart = node % testBlueprint.Participants.Count;
+
+            nextWallet = testBlueprint.Participants[nextPart].WalletAddress;
+
             Siccar.Application.Action? startAction = null;
 
             // setup comms
-            await _actionServiceClient.StartEvents();
+
 
             _actionServiceClient.OnConfirmed += ProcessEvent;
+
+            await _actionServiceClient.StartEvents();
             await _actionServiceClient.SubscribeWallet(myWallet);
+
+
 
             if (node == 1)
             {
@@ -96,7 +111,8 @@ namespace CommTest.mesh
 
                     try
                     {
-                        startAction = await _actionServiceClient.GetAction(myWallet, registerId, blueprintId);
+                        var startActions = await _actionServiceClient.GetStartingActions(myWallet, registerId);
+                        startAction = startActions.First();
                     }
                     catch (Exception er)
                     {
@@ -109,7 +125,7 @@ namespace CommTest.mesh
                 {
                     BlueprintId = blueprintId,
                     RegisterId = registerId,
-                    WalletAddress = myWallet,
+                    WalletAddress = myWallet,                   
                     PreviousTxId = blueprintId,
                     Data = RandomEndorse(1, ballast)
                 };
@@ -118,6 +134,20 @@ namespace CommTest.mesh
 
                 var tx = await _actionServiceClient.Submission(actionSubmit);
                 Console.WriteLine($"Sending Inital Action {startAction.Title} on TxId : {tx.Id}");
+            }
+            else
+            {
+                // we might already have a transaction waiting.. if so deal with it
+                var unTxs = await _walletServiceClient.GetWalletTransactions(myWallet);
+                Console.WriteLine($"Processing latest actions ... {unTxs.Count} ");
+                if (unTxs.Any() )
+                {
+                    
+                    var act2 = unTxs.Last();
+
+                }
+                Console.WriteLine("Awaiting incoming data...");
+                //_actionServiceClient.ReceiveAction
             }
 
             Console.WriteLine("# Press a key to exit.");
@@ -131,7 +161,10 @@ namespace CommTest.mesh
         public async Task ProcessEvent(TransactionConfirmed txData)
         {
 
-            var thisWallet = txData.ToWallets.First();
+            // check if its mine, if so ignore
+            if (txData.Sender == myWallet)
+            { Console.Write("."); return; }
+
 
             var oldBallast = int.Parse(txData.MetaData.TrackingData["ballast"]);
 
@@ -144,7 +177,7 @@ namespace CommTest.mesh
                 {
                     BlueprintId = blueprintId,
                     RegisterId = registerId,
-                    WalletAddress = thisWallet,
+                    WalletAddress = nextWallet,
                     PreviousTxId = txData.TransactionId,
                     Data = RandomEndorse(random.Next(rndFactor), newSize)
                 };

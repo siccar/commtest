@@ -50,7 +50,7 @@ namespace CommTest.mesh
 
             // Setup the Participants
             var disclosures = new List<Disclosure>();
-            var senders = new List<string>();
+            var allParticipants = new List<string>();
             disclosures.Add(JsonSerializer.Deserialize<Disclosure>("{\"participantAddress\": \"TrackingData\",\"dataPointers\": [\"endorse\", \"ballast\"]}", jopts));
 
 
@@ -58,7 +58,14 @@ namespace CommTest.mesh
             {
                 blueprint.Participants.Add(p);
                 disclosures.Add(JsonSerializer.Deserialize<Disclosure>("{\"participantAddress\": \"" + p.Id + "\",\"dataPointers\": [\"endorse\", \"ballast\"]}", jopts));
-                senders.Add(p.Id);
+                allParticipants.Add(p.Id);
+            }
+
+            // setup the action participants 
+            List<Condition> actionParticipant = new List<Condition>();
+            foreach (var p in testParticipants)
+            {
+                actionParticipant.Add(new Condition(p.Id, true));
             }
 
             // Arrange the actions we are going to use 2
@@ -72,8 +79,9 @@ namespace CommTest.mesh
                 DataSchemas = blueprint.DataSchemas,
                 Disclosures = disclosures,
                 Title = "Mesh Trigger Transaction",
-                Description = "A Mesh Transaction",
+                Description = "Mesh Trigger Transaction",
                 Sender = testParticipants.First().Id,
+                AdditionalRecipients = allParticipants,
                 Condition = JsonNode.Parse("{ \"or\": [ false, 1 ] }")
             };
 
@@ -85,7 +93,8 @@ namespace CommTest.mesh
                 DataSchemas = blueprint.DataSchemas,
                 Disclosures = disclosures,
                 Title = "Mesh TX (i) to (!i)",
-                Description = "A Mesh Transaction",
+                Description = "Mesh Repeating Transaction",
+                AdditionalRecipients = allParticipants,
                 Condition = JsonNode.Parse("{ \"or\": [ false, 1 ] }")
             };
 
