@@ -2,7 +2,7 @@
   "profiles": {
     "CommTest": {
       "commandName": "Project",
-      "commandLineArgs": "mesh setup -p 3 "
+      "commandLineArgs": "mesh run 3 ws1jpeg97g5p6ucumqmst5r9v5qekm2frj6zf7zj7yssxx7uyysnlprsvmx5sl 58bb4abe7dc74f1fa4bda03b6f6944f5 0080c33a033b6679fa96abaf149919bab63fd8f46e9543ba4b510eb40cb0284c"
     },
     "Docker": {
       "commandName": "Docker"

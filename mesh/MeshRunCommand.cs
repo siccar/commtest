@@ -29,6 +29,7 @@ namespace CommTest.mesh
             this.Add(new Argument<string>("walletAddress", getDefaultValue: () => "", description: "Wallet to use"));
             this.Add(new Argument<string>("register", getDefaultValue: () => "", description: "Register ID to use"));
             this.Add(new Argument<string>("transaction", getDefaultValue: () => "", description: "Blueprint Transaction Id"));
+            this.Add(new Option<int>(new string[] { "--cycles", "-c" }, getDefaultValue: () => 50, description: "Maximum repeat instance cycle"));
 
             //this.Add(new Option<int>(new string[] { "--scale", "-s" }, getDefaultValue: () => 0, description: "An additional random text payload, size in characters"));
             this.Add(new Option<int>(new string[] { "--ballast", "-b" }, getDefaultValue: () => 0, description: "An initial payload size"));
@@ -48,24 +49,23 @@ namespace CommTest.mesh
             if (_registerServiceClient == null)
                 throw new Exception("Cannot instanciate service client [RegisterServiceClient]");
 
-
-            Handler = CommandHandler.Create<int, string, string, string, int>(RunMesh);
+            Handler = CommandHandler.Create<int, string, string, string, int, int>(RunMesh);
         }
 
-        private async Task RunMesh(int nodeId, string walletAddress, string register, string transaction, int ballast)
+        private async Task RunMesh(int nodeId, string walletAddress, string register, string transaction, int cycles, int ballast)
         {
-            Console.WriteLine("Running Mesh test...");
+            Console.WriteLine($"Running Mesh test... for {cycles} cycles");
 
             Console.WriteLine("Checking Register for Blueprint...");
    
             Console.WriteLine($"\t Starting payload is {ballast} characters");
 
             var thisTest = new MeshTest(serviceProvider, bearer);
-            thisTest.Setup_Test(walletAddress, register, transaction);
-            Thread.Sleep(1000);
+            await thisTest.Setup_Test(walletAddress, register, transaction);
+           
             TimeSpan t1 = TimeSpan.FromSeconds(0);
-
-            t1 = await thisTest.Run_Test(nodeId, ballast);
+            Console.WriteLine($"Mesh starting : {DateTime.Now}");
+            t1 = await thisTest.Run_Test(nodeId, cycles, ballast);
 
             
             Console.WriteLine($"\t Mesh tests completed in {t1}");
