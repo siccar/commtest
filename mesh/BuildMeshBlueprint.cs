@@ -26,7 +26,7 @@ namespace CommTest.mesh
         {
             Blueprint blueprint = new Blueprint()
             {
-                Title = "Mesh Blueprint",
+                Title = "Mesh Blueprint - " + DateTime.Now.ToString(),
                 Description = "A fully meshed transaction load generator",
                 Version = 1
             };
