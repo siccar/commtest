@@ -28,26 +28,29 @@ namespace CommTest.basic
         {
             configuration = config;
             client = new HttpClient();
-            claimsUser = new ClaimsPrincipal();   
+            claimsUser = new ClaimsPrincipal();
             disco = client.GetDiscoveryDocumentAsync(configuration["SiccarService"]).Result;
         }
 
-        public async Task<string> Login(string uri)
+        public async Task<string> Login(string uri = "")
         {
+            if (string.IsNullOrEmpty(uri))
+                uri = configuration["SiccarService"];
 
             if (disco.IsError)
             {
                 Console.WriteLine(disco.Error);
                 return "";
             }
-            var devConnect = disco.DeviceAuthorizationEndpoint ?? "connect/deviceauthorize";
+            var devConnect = disco.DeviceAuthorizationEndpoint ?? "connect/authorize";
 
+            Console.WriteLine("Authenticating as Device");
             var result = await client.RequestDeviceAuthorizationAsync(new DeviceAuthorizationRequest
             {
                 Address = devConnect,
-                ClientId = "siccar-integration-client", //,
-               // ClientSecret = "secret",
-                Scope = "openid profile installation.admin blueprint.admin register.creator tenant.admin wallet.user"
+                ClientId = configuration["clientId"],
+                ClientSecret = configuration["clientSecret"],
+                Scope = configuration["scope"]
             });
 
             if (result.IsError)
@@ -67,18 +70,56 @@ namespace CommTest.basic
 
         }
 
+        public async Task<string> LoginUser(string uri = "")
+        {
+            Console.WriteLine("Authenticating as User");
+            if (string.IsNullOrEmpty(uri))
+                uri = configuration["SiccarService"];
+
+            if (disco.IsError)
+            {
+                Console.WriteLine(disco.Error);
+                return "";
+            }
+            var devConnect = disco.DeviceAuthorizationEndpoint ?? "connect/authorize";
+
+            Console.WriteLine("Authorization Request");
+            var result = await client.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest
+            {
+                Address = devConnect,
+                ClientId = configuration["clientId"],
+                ClientSecret = configuration["clientSecret"]
+            });
+
+            if (result.IsError)
+            {
+                Console.WriteLine($"Failed : {result.Error}");
+                return "";
+            }
+
+            Console.WriteLine($"access token   : {result.AccessToken}");
+
+
+            return result.AccessToken;
+
+        }
+
         public async Task<string> DeviceConnect()
         {
+            var clientId = configuration["clientId"];
+            var clientSecret = configuration["clientSecret"];
+            var scope = configuration["scope"];
 
+            Console.WriteLine("Authenticating using Client Credentials");
             var tokenResponse = await client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
             {
                 Address = disco.TokenEndpoint,
 
-                ClientId = configuration["clientId"],
-                ClientSecret = configuration["clientSecret"],
-                Scope = "installation.admin tenant.admin blueprint.admin register.creator wallet.user"
-               
-            });
+                ClientId = clientId,
+                ClientSecret = clientSecret,
+                Scope = scope
+
+            }); 
 
             if (tokenResponse.IsError)
             {

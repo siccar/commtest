@@ -1,0 +1,397 @@
+{
+  "id": "c03dddfa-2af1-4a09-b3d5-b6db89580d4b",
+  "title": "PingPong with Sum",
+  "description": "A blueprint to bounce transactions backwards, forwards and adda calculation",
+  "version": 1,
+  "dataSchemas": [
+    {
+      "$schema": "http://json-schema.org/draft-07/schema",
+      "$id": "https://siccar.net/schema/endorse.json",
+      "type": "object",
+      "title": "Siccar Endorsement",
+      "description": "A boolean choice 'true' or 'false' ",
+      "default": {
+        "endorse": false,
+        "sum": 1,
+        "ballast": 0
+      },
+      "examples": [
+        {
+          "endorse": true
+        }
+      ],
+      "required": [
+        "endorse"
+      ],
+      "properties": {
+        "endorse": {
+          "$id": "#/properties/endorse",
+          "type": "boolean",
+          "title": "Endorsement",
+          "description": "Do you endorse the presented data?"
+        },
+        "textdata": {
+          "$id": "#/properties/textdata",
+          "type": "string",
+          "title": "textdata",
+          "description": "Some text data."
+        },
+        "balast": {
+          "$id": "#/properties/ballast",
+          "type": "integer",
+          "title": "sizedata",
+          "description": "Size of payload",
+          "default": 0
+        },
+        "sum": {
+          "$id": "#/properties/sum",
+          "type": "integer",
+          "title": "total",
+          "description": "a running total",
+          "default": 0
+        }
+      },
+      "additionalProperties": true
+    },
+    {
+      "$schema": "http://json-schema.org/draft-07/schema",
+      "$id": "https://siccar.net/",
+      "type": "object",
+      "required": [],
+      "properties": {
+        "calculatedValue": {
+          "$id": "sumOfCount",
+          "type": "integer",
+          "title": "value",
+          "description": "Number for Calculation"
+        }
+      }
+    }
+  ],
+  "participants": [
+    {
+      "id": "25FD5262-932C-4B58-8E17-378B03AA818A",
+      "name": "Ping Participant",
+      "organisation": "Org1",
+      "walletAddress": "@@walletAddress0@@",
+      "useStealthAddress": false
+    },
+    {
+      "id": "91CC629C-DC4F-42CD-A54F-4BB201B14ECA",
+      "name": "Pong Participant",
+      "organisation": "Org1",
+      "walletAddress": "@@walletAddress1@@",
+      "useStealthAddress": false
+    }
+  ],
+  "actions": [
+    {
+      "id": 1,
+      "previousTxId": "000000000000000000000000000000000",
+      "blueprint": "c03dddfa-2af1-4a09-b3d5-b6db89580d4b",
+      "title": "Ping Action",
+      "description": "P1 sends to P2",
+      "sender": "25FD5262-932C-4B58-8E17-378B03AA818A",
+      "dataSchemas": [
+        {
+          "$schema": "http://json-schema.org/draft-07/schema",
+          "$id": "https://siccar.net/schema/endorse.json",
+          "type": "object",
+          "title": "Siccar Endorsement",
+          "description": "A boolean choice 'true' or 'false' ",
+          "default": {
+            "endorse": false,
+            "sum": 1,
+            "ballast": 0
+          },
+          "examples": [
+            {
+              "endorse": true
+            }
+          ],
+          "required": [
+            "endorse"
+          ],
+          "properties": {
+            "endorse": {
+              "$id": "#/properties/endorse",
+              "type": "boolean",
+              "title": "Endorsement",
+              "description": "Do you endorse the presented data?"
+            },
+            "textdata": {
+              "$id": "#/properties/textdata",
+              "type": "string",
+              "title": "textdata",
+              "description": "Some text data."
+            },
+            "balast": {
+              "$id": "#/properties/ballast",
+              "type": "integer",
+              "title": "sizedata",
+              "description": "Size of payload",
+              "default": 0
+            },
+            "sum": {
+              "$id": "#/properties/sum",
+              "type": "integer",
+              "title": "total",
+              "description": "a running total",
+              "default": 0
+            }
+          },
+          "additionalProperties": true
+        },
+        {
+          "$schema": "http://json-schema.org/draft-07/schema",
+          "$id": "https://siccar.net/",
+          "type": "object",
+          "required": [],
+          "properties": {
+            "calculatedValue": {
+              "$id": "sumOfCount",
+              "type": "integer",
+              "title": "value",
+              "description": "Number for Calculation"
+            }
+          }
+
+      ],
+      "participants": [
+        {
+          "25FD5262-932C-4B58-8E17-378B03AA818A": [ { "==": [ 0, 0 ] } ]
+        }
+      ],
+      "disclosures": [
+        {
+          "participantAddress": "TrackingData",
+          "dataPointers": [
+            "endorse",
+            "ballast",
+            "value"
+          ]
+        },
+        {
+          "participantAddress": "@@walletAddress1@@",
+          "dataPointers": [
+            "endorse",
+            "textdata"
+          ]
+        }
+      ],
+      "condition": { "or": [ false, 2 ] },
+      "form": {
+        "type": "Layout",
+        "title": "",
+        "scope": "$",
+        "layout": "VerticalLayout",
+        "elements": [],
+        "conditions": []
+      }
+    },
+    {
+      "id": 2,
+      "previousTxId": "000000000000000000000000000000000",
+      "blueprint": "c03dddfa-2af1-4a09-b3d5-b6db89580d4b",
+      "title": "Pong Action",
+      "description": "P2 sends to P1 and P2",
+      "sender": "91CC629C-DC4F-42CD-A54F-4BB201B14ECA",
+      "participants": [
+        {
+          "91CC629C-DC4F-42CD-A54F-4BB201B14ECA": [ { "==": [ 0, 0 ] } ]
+        }
+      ],
+      "dataSchemas": [
+        {
+          "$schema": "http://json-schema.org/draft-07/schema",
+          "$id": "https://siccar.net/schema/endorse.json",
+          "type": "object",
+          "title": "Siccar Endorsement",
+          "description": "A boolean choice 'true' or 'false' ",
+          "default": {
+            "endorse": false,
+            "sum": 1,
+            "ballast": 0
+          },
+          "examples": [
+            {
+              "endorse": true
+            }
+          ],
+          "required": [
+            "endorse"
+          ],
+          "properties": {
+            "endorse": {
+              "$id": "#/properties/endorse",
+              "type": "boolean",
+              "title": "Endorsement",
+              "description": "Do you endorse the presented data?"
+            },
+            "textdata": {
+              "$id": "#/properties/textdata",
+              "type": "string",
+              "title": "textdata",
+              "description": "Some text data."
+            },
+            "balast": {
+              "$id": "#/properties/ballast",
+              "type": "integer",
+              "title": "sizedata",
+              "description": "Size of payload",
+              "default": 0
+            },
+            "sum": {
+              "$id": "#/properties/sum",
+              "type": "integer",
+              "title": "total",
+              "description": "a running total",
+              "default": 0
+            }
+          },
+          "additionalProperties": true
+        }
+      ],
+      "Calculations": {
+        "sum": {
+          "+": [
+            {
+              "var": "litresOfOilBurned"
+            },
+            {
+              "var": "conversionFactor"
+            }
+          ]
+        }
+      },
+      "disclosures": [
+        {
+          "participantAddress": "TrackingData",
+          "dataPointers": [
+            "endorse",
+            "ballast",
+            "sum"
+          ]
+        },
+        {
+          "participantAddress": "@@walletAddress0@@",
+          "dataPointers": [
+            "endorse",
+            "textdata"
+          ]
+        }
+      ],
+      "condition": { "or": [ false, 1 ] },
+      "form": {
+        "type": "Layout",
+        "title": "",
+        "scope": "$",
+        "layout": "VerticalLayout",
+        "elements": [],
+        "conditions": []
+      }
+    },
+    {
+      "id": 3,
+      "previousTxId": "000000000000000000000000000000000",
+      "blueprint": "c03dddfa-2af1-4a09-b3d5-b6db89580d4b",
+      "title": "Pong Action",
+      "description": "P2 sends to P1 and P2",
+      "sender": "91CC629C-DC4F-42CD-A54F-4BB201B14ECA",
+      "participants": [
+        { "25FD5262-932C-4B58-8E17-378B03AA818A": [ { "==": [ 0, 0 ] } ] },
+        { "91CC629C-DC4F-42CD-A54F-4BB201B14ECA": [ { "==": [ 0, 0 ] } ] }
+      ],
+      "dataSchemas": [
+        {
+          "$schema": "http://json-schema.org/draft-07/schema",
+          "$id": "https://siccar.net/schema/endorse.json",
+          "type": "object",
+          "title": "Siccar Endorsement",
+          "description": "A boolean choice 'true' or 'false' ",
+          "default": {
+            "endorse": false,
+            "sum": 1,
+            "ballast": 0
+          },
+          "examples": [
+            {
+              "endorse": true
+            }
+          ],
+          "required": [
+            "endorse"
+          ],
+          "properties": {
+            "endorse": {
+              "$id": "#/properties/endorse",
+              "type": "boolean",
+              "title": "Endorsement",
+              "description": "Do you endorse the presented data?"
+            },
+            "textdata": {
+              "$id": "#/properties/textdata",
+              "type": "string",
+              "title": "textdata",
+              "description": "Some text data."
+            },
+            "balast": {
+              "$id": "#/properties/ballast",
+              "type": "integer",
+              "title": "sizedata",
+              "description": "Size of payload",
+              "default": 0
+            },
+            "sum": {
+              "$id": "#/properties/sum",
+              "type": "integer",
+              "title": "total",
+              "description": "a running total",
+              "default": 0
+            }
+          },
+          "additionalProperties": true
+        }
+      ],
+      "Calculations": {
+        "sum": {
+          "+": [
+            {
+              "var": "sum"
+            },
+            {
+              "var": "sum"
+            }
+          ]
+        }
+      },
+      "disclosures": [
+        {
+          "participantAddress": "TrackingData",
+          "dataPointers": [
+            "endorse",
+            "ballast",
+            "sum"
+          ]
+        },
+        {
+          "participantAddress": "@@walletAddress0@@",
+          "dataPointers": [
+            "endorse",
+            "textdata",
+            "sum"
+          ]
+        }
+      ],
+      "condition": { "or": [ false, 1 ] },
+      "form": {
+        "type": "Layout",
+        "title": "",
+        "scope": "$",
+        "layout": "VerticalLayout",
+        "elements": [],
+        "conditions": []
+      }
+    }
+  ]
+}

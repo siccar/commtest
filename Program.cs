@@ -100,7 +100,7 @@ namespace CommTest.basic
 
                 // TODO: Now Get the Token.
                 bearer = await authn.DeviceConnect();
-
+                // bearer = await authn.Login();
                 if (string.IsNullOrWhiteSpace(bearer))
                 {
                     Console.WriteLine($"Test client cannot continue.");

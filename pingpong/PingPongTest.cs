@@ -97,6 +97,7 @@ namespace CommTest.pingpong
 
             // what no blueprint service client
             TransactionModel bpTxId;
+ 
             if (reuse)
             {
                 Console.WriteLine($"Not currently reusing Blueprint");
@@ -105,14 +106,19 @@ namespace CommTest.pingpong
             {
                 throw new Exception("Must run a number of threads/wallets");
             }
-            bpTxId = await _blueprintServiceClient.PublishBlueprint(testWallets[0].Address, registerId, blueprint);
+            try
+            {
+                bpTxId = await _blueprintServiceClient.PublishBlueprint(testWallets[0].Address, registerId, blueprint);
+                blueprintId = bpTxId.Id;
+                Console.WriteLine($"Blueprint created and published, TXId  : {blueprintId}");
+                isSetup = true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"FAILED: Publishing {blueprint.Id} to register {registerId} for wallet : {testWallets[0].Address}");
+            }
 
-            Console.WriteLine($"Blueprint created and published, TXId  : {bpTxId.Id}");
-
-            blueprintId = bpTxId.Id;
-
-            isSetup = true;
-            return bpTxId.Id;
+            return blueprintId;
         }
 
         /// <summary>
@@ -217,23 +223,26 @@ namespace CommTest.pingpong
 
             var oldBallast = int.Parse(txData.MetaData.TrackingData["ballast"]);
 
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
             try
             {
                 var nextAction = await _actionServiceClient.GetAction(txData.ToWallets.First(), txData.MetaData.RegisterId, txData.TransactionId);
-
+                var actionTs = stopwatch.Elapsed.TotalMilliseconds;
                 int newSize = oldBallast + scaleSize;
                 ActionSubmission actionSubmit = new ActionSubmission()
                 {
                     BlueprintId = blueprintId,
                     RegisterId = registerId,
                     WalletAddress = thisWallet,
-                    PreviousTxId = txData.TransactionId,
+                    PreviousTxId = blueprintId,  // use one or other to choose between rereading all previous txs with txData.TransactionId, or no lookup by using blueprintId
                     Data = RandomEndorse(random.Next(rndFactor), newSize)
                 };
 
                 var tx = await _actionServiceClient.Submission(actionSubmit);
 
-                Console.WriteLine($"Processed {executedRounds} Action {nextAction.Title} on TxId : {tx.Id}");
+                stopwatch.Stop();
+                Console.WriteLine($"Processed {executedRounds} Action {nextAction.Title} on TxId : {tx.Id} in : GetAction {actionTs} ms: SubmitAction {stopwatch.ElapsedMilliseconds} ms @ {DateTime.Now.ToString("h:mm:ss")} ");
                 Interlocked.Increment(ref executedRounds);
 
                 if (scaleSize > 0)
@@ -243,6 +252,10 @@ namespace CommTest.pingpong
             catch (Exception er)
             {
                 Console.WriteLine(er);
+            }
+            finally { 
+                stopwatch.Stop();
+               
             }
         }
 
