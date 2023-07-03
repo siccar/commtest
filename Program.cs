@@ -16,7 +16,9 @@ using Microsoft.Extensions.Http;
 using Siccar.Common.Exceptions;
 using static Google.Rpc.Context.AttributeContext.Types;
 using Google.Api;
+using Microsoft.ApplicationInsights;
 using System.CommandLine;
+using Microsoft.ApplicationInsights.Extensibility;
 
 namespace CommTest.basic
 {
@@ -28,6 +30,8 @@ namespace CommTest.basic
         static async Task<int> Main(string[] args)
         {
             Console.WriteLine("Siccar System Checker v2.0");
+
+            TelemetryConfiguration.Active.InstrumentationKey = "69f3e190-025e-435c-868c-0eaf7dc5412a"; 
 
             _configuration = SetupConfiguration();
 

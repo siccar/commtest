@@ -30,6 +30,8 @@ namespace CommTest.pingpong
         private int rndFactor = 2; // choice of 2 will give balance, higer values wille skew bias
 
         private int executedRounds = 1;
+        private int delay = 0;
+        private DateTime lastRound = DateTime.MinValue;
         private bool isSetup = false;
         private string _bearer = "";
 
@@ -90,19 +92,19 @@ namespace CommTest.pingpong
                 testWallets.Add(newWallet);
                 Console.WriteLine($"Created new Wallet[{i}] : {testWallets[i].Address}");
             }
-            
+
             var blueprint = BuildBlueprint("pingpong/pingpong.json", testWallets);
-            
+
             // is it worth writing a debug copy?
 
             // what no blueprint service client
             TransactionModel bpTxId;
- 
+
             if (reuse)
             {
                 Console.WriteLine($"Not currently reusing Blueprint");
             }
-            if (testWallets.Count<1)
+            if (testWallets.Count < 1)
             {
                 throw new Exception("Must run a number of threads/wallets");
             }
@@ -209,7 +211,30 @@ namespace CommTest.pingpong
             }
             else
             {
-                Console.ReadKey(true);
+
+                // lets do a wee watch dog
+                while (true)
+                {
+                    Thread.Sleep(250);
+                    delay++;
+
+                    if (delay % 4 == 0)
+                    {
+                        if (delay > 40)
+                            Console.Write("\bx");
+                        else
+                            Console.Write("\bo");
+                    }
+                    if (delay % 8 == 0)
+                    {
+                        if (delay > 40)
+                            Console.Write("\bX");
+                        else
+                        Console.Write("\bO");
+                    }
+                    if (delay > 100)
+                        Console.Write(">>");
+                }
             }
 
             pingpongStopwatch.Stop();
@@ -242,20 +267,24 @@ namespace CommTest.pingpong
                 var tx = await _actionServiceClient.Submission(actionSubmit);
 
                 stopwatch.Stop();
-                Console.WriteLine($"Processed {executedRounds} Action {nextAction.Title} on TxId : {tx.Id} in : GetAction {actionTs} ms: SubmitAction {stopwatch.ElapsedMilliseconds} ms @ {DateTime.Now.ToString("h:mm:ss")} ");
+                Console.WriteLine($"\b Processed {executedRounds} Action {nextAction.Title} on TxId : {tx.Id} in : GetAction {actionTs} ms: SubmitAction {stopwatch.ElapsedMilliseconds} ms @ {DateTime.Now.ToString("h:mm:ss")} ");
                 Interlocked.Increment(ref executedRounds);
 
                 if (scaleSize > 0)
                     Console.WriteLine($"Ballast size : {newSize}");
 
+                lastRound = DateTime.Now;
+
+                delay = 0;
             }
             catch (Exception er)
             {
                 Console.WriteLine(er);
             }
-            finally { 
+            finally
+            {
                 stopwatch.Stop();
-               
+
             }
         }
 
