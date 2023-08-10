@@ -49,7 +49,7 @@ namespace CommTest.calc
         {
             return ("txId");
         }
-        public TimeSpan Go_Calc(int itterations)
+        public async Task<TimeSpan> Go_Calc(int itterations)
         {
 
             return TimeSpan.Zero;

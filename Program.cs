@@ -16,9 +16,7 @@ using Microsoft.Extensions.Http;
 using Siccar.Common.Exceptions;
 using static Google.Rpc.Context.AttributeContext.Types;
 using Google.Api;
-using Microsoft.ApplicationInsights;
 using System.CommandLine;
-using Microsoft.ApplicationInsights.Extensibility;
 
 namespace CommTest.basic
 {
@@ -30,8 +28,6 @@ namespace CommTest.basic
         static async Task<int> Main(string[] args)
         {
             Console.WriteLine("Siccar System Checker v2.0");
-
-            TelemetryConfiguration.Active.InstrumentationKey = "69f3e190-025e-435c-868c-0eaf7dc5412a"; 
 
             _configuration = SetupConfiguration();
 
@@ -80,7 +76,10 @@ namespace CommTest.basic
                 new mesh.MeshRunCommand("run", _host.Services),
                 //new mesh.MeshBuildBPCommand("build", _host.Services)
             });
-
+            rootCommand.AddCommand(new Command("cal", "simple calculation tests")
+            {
+                new basic.BasicCommand("wallet", _serviceProvider),
+            });
             rootCommand.AddCommand(new pingpong.PingPongCommand("pingpong", _serviceProvider, bearer));
             return await rootCommand.InvokeAsync(args);
         }
@@ -104,7 +103,7 @@ namespace CommTest.basic
 
                 // TODO: Now Get the Token.
                 bearer = await authn.DeviceConnect();
-                // bearer = await authn.Login();
+
                 if (string.IsNullOrWhiteSpace(bearer))
                 {
                     Console.WriteLine($"Test client cannot continue.");

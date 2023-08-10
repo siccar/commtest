@@ -1,6 +1,7 @@
 {
   "id": "c03dddfa-2af1-4a09-b3d5-b6db89580d4b",
-  "title": "PingPong with Sum",
+  "$ref" : "https://siccar.dev/schemas/v1/blueprint.json",
+  "title": "Running Sum Calculation",
   "description": "A blueprint to bounce transactions backwards, forwards and adda calculation",
   "version": 1,
   "dataSchemas": [
@@ -154,8 +155,8 @@
               "title": "value",
               "description": "Number for Calculation"
             }
-          }
-
+          }          
+        }
       ],
       "participants": [
         {
@@ -175,7 +176,8 @@
           "participantAddress": "@@walletAddress1@@",
           "dataPointers": [
             "endorse",
-            "textdata"
+            "textdata",
+            "value"
           ]
         }
       ],
@@ -353,7 +355,7 @@
           "additionalProperties": true
         }
       ],
-      "Calculations": {
+      "calculations": {
         "sum": {
           "+": [
             {
